@@ -25,8 +25,13 @@ use node_runtime::{
     GenesisConfig, GrandpaConfig, IndicesConfig, MultiPaymentConfig, SessionConfig, SocietyConfig,
     StakerStatus, StakingConfig, SystemConfig, TokensConfig, BABE_GENESIS_EPOCH_CONFIG,
 };
+use sp_core::crypto::AccountId32;
 use sp_keyring::{Ed25519Keyring, Sr25519Keyring};
+use sp_runtime::traits::BlakeTwo256;
+use sp_runtime::traits::Hash;
 use sp_runtime::{FixedU128, Perbill};
+
+use sp_core::crypto::UncheckedFrom;
 
 /// Create genesis runtime configuration for tests.
 pub fn config(code: Option<&[u8]>) -> GenesisConfig {
@@ -36,16 +41,20 @@ pub fn config(code: Option<&[u8]>) -> GenesisConfig {
 /// Create genesis runtime configuration for tests with some extra
 /// endowed accounts.
 pub fn config_endowed(code: Option<&[u8]>, extra_endowed: Vec<AccountId>) -> GenesisConfig {
-    let mut endowed = vec![
+    let buf: Vec<u8> = "//xyk-pool/".as_bytes().to_vec();
+    let pool_account_id = AccountId32::unchecked_from(BlakeTwo256::hash(&buf[..]));
+
+    let endowed = vec![
         (alice(), 111 * DOLLARS),
         (bob(), 100 * DOLLARS),
         (charlie(), 100_000_000 * DOLLARS),
         (dave(), 111 * DOLLARS),
         (eve(), 101 * DOLLARS),
         (ferdie(), 100 * DOLLARS),
+        (pool_account_id.clone(), 1000 * DOLLARS),
     ];
 
-   /* endowed.extend(
+    /* endowed.extend(
         extra_endowed
             .iter()
             .map(|endowed| (endowed.clone(), 100 * DOLLARS)),
@@ -53,10 +62,13 @@ pub fn config_endowed(code: Option<&[u8]>, extra_endowed: Vec<AccountId>) -> Gen
 
     */
 
-    let tokens_endowed = extra_endowed
+    let mut tokens_endowed = extra_endowed
         .iter()
         .map(|endowed| (endowed.clone(), 1, 100 * DOLLARS))
         .collect::<Vec<(AccountId, u32, Balance)>>();
+
+    tokens_endowed.push((pool_account_id, 1, 1000 * DOLLARS));
+
     let non_native_accounts = extra_endowed
         .into_iter()
         .map(|endowed| (endowed, 1))

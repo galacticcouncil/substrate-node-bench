@@ -74,6 +74,8 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 
+use sp_runtime::traits::CheckedDiv;
+
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
 #[cfg(any(feature = "std", test))]
@@ -429,7 +431,7 @@ parameter_types! {
     pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
 }
 
-use pallet_transaction_multi_payment::MultiCurrencyAdapter;
+use pallet_transaction_multi_payment::{MultiCurrencyAdapter, Price};
 
 impl pallet_transaction_payment::Config for Runtime {
     type OnChargeTransaction = MultiCurrencyAdapter<Balances, (), MultiPayment>;
@@ -1269,12 +1271,13 @@ impl pallet_transaction_storage::Config for Runtime {
 
 use frame_support::weights::WeightToFeeCoefficient;
 use frame_support::weights::{Pays, WeightToFeeCoefficients, WeightToFeePolynomial};
-use orml_traits::parameter_type_with_key;
+use orml_traits::{parameter_type_with_key, MultiCurrency};
 use smallvec::smallvec;
 type AssetId = u32;
 use orml_currencies::BasicCurrencyAdapter;
 
 use hydradx_traits::pools::SpotPriceProvider;
+use sp_core::crypto::{AccountId32, UncheckedFrom};
 
 pub struct WeightToFee;
 impl WeightToFeePolynomial for WeightToFee {
@@ -1314,9 +1317,13 @@ parameter_type_with_key! {
         0u128
     };
 }
-pub struct SpotPrice;
 
-impl SpotPriceProvider<AssetId> for SpotPrice {
+pub struct SpotPrice<T>(sp_std::marker::PhantomData<T>);
+
+impl<T: frame_system::Config> SpotPriceProvider<AssetId> for SpotPrice<T>
+where
+    T::AccountId: UncheckedFrom<T::Hash> + AsRef<[u8]> + Into<AccountId32>,
+{
     type Price = FixedU128;
 
     fn pair_exists(_asset_a: AssetId, _asset_b: AssetId) -> bool {
@@ -1326,11 +1333,28 @@ impl SpotPriceProvider<AssetId> for SpotPrice {
     fn spot_price(asset_a: AssetId, asset_b: AssetId) -> Option<Self::Price> {
         let native_asset = NativeAssetId::get();
         let kusd_asset = KusdAssetId::get();
+        let buf: Vec<u8> = "//xyk-pool/".as_bytes().to_vec();
+        let pool_account_id: AccountId32 = T::AccountId::unchecked_from(
+            <T::Hashing as frame_support::sp_runtime::traits::Hash>::hash(&buf[..]),
+        )
+        .into();
+
+        let a_reserve = <Currencies as MultiCurrency<AccountId>>::free_balance(
+            native_asset,
+            &pool_account_id.clone(),
+        );
+        let b_reserve =
+            <Currencies as MultiCurrency<AccountId>>::free_balance(kusd_asset, &pool_account_id);
+
+        let a_reserve = Price::checked_from_integer(a_reserve).unwrap();
+        let b_reserve = Price::checked_from_integer(b_reserve).unwrap();
 
         if asset_a == native_asset && asset_b == kusd_asset {
-            Some(FixedU128::from((1, 2)))
+            let price = b_reserve.checked_div(&a_reserve).unwrap();
+            Some(price)
         } else if asset_b == native_asset && asset_a == kusd_asset {
-            Some(FixedU128::from((1, 2)))
+            let price = a_reserve.checked_div(&b_reserve).unwrap();
+            Some(price)
         } else {
             None
         }
@@ -1362,7 +1386,7 @@ impl pallet_transaction_multi_payment::Config for Runtime {
     type Event = Event;
     type AcceptedCurrencyOrigin = EnsureSigned<AccountId>;
     type Currencies = Currencies;
-    type SpotPriceProvider = SpotPrice;
+    type SpotPriceProvider = SpotPrice<Runtime>;
     type WeightInfo = ();
     type WithdrawFeeForSetCurrency = MultiPaymentCurrencySetFee;
     type WeightToFee = WeightToFee;
