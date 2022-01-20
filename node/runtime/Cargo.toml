@@ -102,8 +102,8 @@ pallet-vesting ={ git = "https://github.com/paritytech/substrate", branch = "pol
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "1c80da43a720d1b957e1ba12238e4d98b2ee8cf9", default-features = false }
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "1c80da43a720d1b957e1ba12238e4d98b2ee8cf9", default-features = false }
 orml-currencies = { git = "https://github.com/open-web3-stack/open-runtime-module-library", rev = "1c80da43a720d1b957e1ba12238e4d98b2ee8cf9", default-features = false }
-pallet-transaction-multi-payment = { git = "https://github.com/galacticcouncil/warehouse", rev = "6ed0f88a4ebb6912a494f7a71c9600c81e063701", default-features = false}
-hydradx-traits = { git = "https://github.com/galacticcouncil/warehouse", rev = "6ed0f88a4ebb6912a494f7a71c9600c81e063701", default-features = false}
+pallet-transaction-multi-payment = { git = "https://github.com/galacticcouncil/warehouse", rev = "2b50c91b419e1091c341cc8e3bd5afef56022180", default-features = false}
+hydradx-traits = { git = "https://github.com/galacticcouncil/warehouse", rev = "2b50c91b419e1091c341cc8e3bd5afef56022180", default-features = false}
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }

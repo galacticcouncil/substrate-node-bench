@@ -48,5 +48,4 @@ futures = "0.3.1"
 codec = { package = "parity-scale-codec", version = "2.0.0" }
 
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
-pallet-transaction-multi-payment = { git = "https://github.com/galacticcouncil/warehouse", rev = "6ed0f88a4ebb6912a494f7a71c9600c81e063701", default-features = false}
-#pallet-transaction-multi-payment = { path="../../../pallets/transaction-multi-payment" }
+pallet-transaction-multi-payment = { git = "https://github.com/galacticcouncil/warehouse", rev = "2b50c91b419e1091c341cc8e3bd5afef56022180", default-features = false}

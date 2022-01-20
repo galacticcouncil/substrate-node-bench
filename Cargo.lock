@@ -2083,7 +2083,7 @@ dependencies = [
 [[package]]
 name = "hydradx-traits"
 version = "0.5.0"
-source = "git+https://github.com/galacticcouncil/warehouse?rev=6ed0f88a4ebb6912a494f7a71c9600c81e063701#6ed0f88a4ebb6912a494f7a71c9600c81e063701"
+source = "git+https://github.com/galacticcouncil/warehouse?rev=2b50c91b419e1091c341cc8e3bd5afef56022180#2b50c91b419e1091c341cc8e3bd5afef56022180"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -4659,7 +4659,7 @@ dependencies = [
 [[package]]
 name = "pallet-transaction-multi-payment"
 version = "7.0.0"
-source = "git+https://github.com/galacticcouncil/warehouse?rev=6ed0f88a4ebb6912a494f7a71c9600c81e063701#6ed0f88a4ebb6912a494f7a71c9600c81e063701"
+source = "git+https://github.com/galacticcouncil/warehouse?rev=2b50c91b419e1091c341cc8e3bd5afef56022180#2b50c91b419e1091c341cc8e3bd5afef56022180"
 dependencies = [
  "frame-support",
  "frame-system",
